@@ -35,7 +35,7 @@ To execute the program
     
     eg:
     
-    python3.2 -m distalgo.runtime RADriver.da -d "/home/aravindous/Documents/DistAlgo-0.3" -p 10 20
+    python3.2 -m distalgo.runtime RADriver.da -d "/home/sivaranjini/Documents/DistAlgo-0.3" -p 10 20
     
 
 2. Suzuki Kasami Algorithm
@@ -50,7 +50,7 @@ To execute the program
     
     eg:
     
-    python3.2 -m distalgo.runtime SKDriver.da -d "/home/aravindous/Documents/DistAlgo-0.3" -p 10 20
+    python3.2 -m distalgo.runtime SKDriver.da -d "/home/sivaranjini/Documents/DistAlgo-0.3" -p 10 20
 
     
 OBSERVATIONS
