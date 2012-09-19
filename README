@@ -1,0 +1,63 @@
+CSE 594 - DISTRIBUTED SYSTEMS - ASSIGNMENT -1
+---------------------------------------------
+
+NAME:   SIVARANJINI DHARMALINGAM
+SBUID:  108493054
+
+---------------------------------------------
+
+FILES:
+------
+
+This package includes the following files:
+
+     RADriver.da            - This is the driver program for Ricart Agrawala
+     RAToken.da             - This is the process class for Ricart Agrawala algorithm implementation
+     SKDriver.da            - This is the driver program for Suzuki Kasami
+     SKToken.da             - This is the process class for Suzuki Kasami algorithm implementation                       
+     README                 - This file
+     
+
+USAGE:
+------
+
+To execute the program
+
+1. Ricart Agrawala Algorithm
+   --------------------------
+    
+    python -m distalgo.runtime RADriver.da -d <<directory>> -p <<noOfProcess>> <<noOfRequests>>
+    
+    where,
+    << directory >>   - indicates the location of the source files.
+    << noOfProcess>>  - indicates the no of processes to be executed.
+    << noOfRequests>> - indicates the total number of requests to be executed by all processes.
+    
+    eg:
+    
+    python3.2 -m distalgo.runtime RADriver.da -d "/home/aravindous/Documents/DistAlgo-0.3" -p 10 20
+    
+
+2. Suzuki Kasami Algorithm
+   -----------------------
+
+    python -m distalgo.runtime SKDriver.da -d <<directory>> -p <<noOfProcess>> <<noOfRequests>>
+    
+    where,
+    << directory >>   - indicates the location of the source files.
+    << noOfProcess>>  - indicates the no of processes to be executed.
+    << noOfRequests>> - indicates the total number of requests to be executed by all processes.
+    
+    eg:
+    
+    python3.2 -m distalgo.runtime SKDriver.da -d "/home/aravindous/Documents/DistAlgo-0.3" -p 10 20
+
+    
+OBSERVATIONS
+------------
+
+1. I had initially completed my assignment in DistAlgo-0.1, where the log file when specified --logfile <<filename>> it did create the log file.
+   But, in DistAlgo-0.3, the log file was not created for the filename specified.
+       
+   
+

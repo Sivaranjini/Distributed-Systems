@@ -1,0 +1,100 @@
+# Suzuki-Kasami's Token based Algorithm
+
+# Import libraries
+import sys
+import random
+import itertools
+
+# Suzuki-Kasami algorithm process class
+class SKToken(DistProcess):
+
+    # Constructor for initializing variables
+    def setup(reqProcess,processList,processRequestCnt,initial_tokenvalue): 
+        
+        process_Id =  self._id
+        HavePrivilege = initial_tokenvalue
+        Requesting = False
+        Q = []
+        
+        RN = dict.fromkeys(processList,-1)
+        LN  = dict.fromkeys(processList,-1)
+
+        processList = processList
+        reqProcess = reqProcess
+        requestCount = processRequestCnt
+        requestNo = 0
+        
+    # Critical section task
+    def cs(task):       
+        
+        --start
+        Requesting = True
+        
+        # To request for token to all processes when it does not hold
+        if(not(HavePrivilege)):
+            RN[process_Id] += 1
+            output(REQUESTING +'Process Id: ' + (str(process_Id)) + ' Request No: '+(str(requestNo)) + (' REQUESTING CS') + EXIT)
+            send(Request(process_Id, RN[process_Id]), reqProcess)
+               
+        --await
+        await(HavePrivilege == True) 
+        
+        --cs
+        task()  
+        
+        --release
+        output(LEAVING +'Process Id: ' + (str(process_Id)) + ' Request No: '+(str(requestNo)) + (' LEAVING CS') + EXIT)
+        
+        LN[process_Id] = RN[process_Id]
+        
+        for process in reqProcess :
+            
+            if ((not(process in Q)) and (RN[process] == LN[process]+1)):
+                Q.append(process)
+                
+        if(Q):
+            HavePrivilege = False
+            
+            tempQ = Q
+            headQ = tempQ.pop(0)
+            
+            try:
+                send(Privilege(tempQ,LN),headQ)
+                output(GRANTING +'Process Id: ' + (str(process_Id)) + (' SENDS TOKEN TO Process Id: ')+(str(headQ)) + EXIT)
+            except ImportError:
+                 from queue import Queue            
+        
+        Requesting = False   
+             
+        
+    # Main function which sends no of requests alloted to it          
+    def main():
+        def anounce():
+            output(ENTERING +'Process Id: ' + (str(process_Id)) + ' Request No: '+(str(requestNo)) + (' ENTERING CS') + EXIT)
+            
+        for i in range(1,requestCount+1):
+            requestNo = i
+            cs(anounce)
+        
+        --await
+        await(HavePrivilege == False)
+
+     
+    # On receiving the token request sets the request number count
+    def OnRequest(fprocess_Id, fReqNo):      
+        RN[fprocess_Id] = max(RN[fprocess_Id] , fReqNo)
+        
+        if((HavePrivilege) and (not(Requesting)) and (RN[fprocess_Id] == LN[fprocess_Id] + 1)):
+            HavePrivilege = False
+            
+            try:
+                output(GRANTING +'Process Id: ' + (str(process_Id)) + (' SENDS TOKEN TO Process Id: ')+(str(fprocess_Id)) + EXIT)
+                send(Privilege(Q,LN), fprocess_Id)
+            except ImportError:
+                 from queue import Queue
+    
+    # Sends token to the requesting process
+    def OnPrivilege(fQ,fLN):
+        Q = fQ
+        LN = fLN
+        HavePrivilege = True

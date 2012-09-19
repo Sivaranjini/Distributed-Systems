@@ -1,0 +1,170 @@
+
+# SUZUKI-KASAMI'S Driver program
+
+# Definining global variables for color formatting
+INFO = '\033[94m'
+ERROR = '\033[91m'
+EXIT = '\033[0m'
+WARN = '\033[93m'
+
+LEAVING    = '\033[91m'
+ENTERING   = '\033[92m'
+REQUESTING = '\033[93m'
+GRANTING   = '\033[94m'
+
+
+# Initialization of the variables process count and request count
+processCnt = 0
+requestCnt  = 0
+directorychk = 0
+
+# Including the source code of the class
+for i in range(1,len(sys.argv)):
+
+    if((sys.argv[i]=='-d')):
+     
+        try:
+            dist_source(sys.argv[i+1],"SKToken.da")
+            directorychk = 1
+            break
+        except:
+            print(ERROR + "ERROR: The directory specified does not have the source file"+EXIT)
+            sys.exit(1)
+            
+if directorychk == 0:
+    print(ERROR + "ERROR: The command to execute the program is \n"+"python -m distalgo.runtime SKDriver.da -d <<directory>> -p <<noOfProcess>> <<noOfRequests>>\neg: python3.2 -m distalgo.runtime RADriver.da -d \"/home/aravindous/Documents/DistAlgo-0.3\" -p 5 15"+EXIT)
+    sys.exit(1)
+
+
+# Validate the parameters on the No of processes and requests on whether they are numeric and greater than 0
+def validateArguments(fvalue,ftype):
+
+    validateResult = True
+    
+    if ( ftype == "Processes" ):
+        try:
+            processCnt = int(fvalue)
+            if(processCnt <= 0):
+                validateResult = false
+        except:
+            validateResult = False
+    else:
+        try:
+            requestCnt = int(fvalue)
+            if(requestCnt <= 0):
+                validateResult = false
+        except:
+            validateResult = False
+    
+    if(validateResult == False):
+        print(ERROR + "ERROR:   The No of "+ftype+" should be a positive integer > 0" + EXIT)  
+        sys.exit(1)
+        
+    return validateResult
+        
+
+# Main function which invokes create and set procs                
+def main():
+
+    default = 0
+    pos = 0
+    
+    # Performs validation check
+    for cnt in range(1,len(sys.argv)) :
+
+        if(sys.argv[cnt]=='-p') :
+        
+            pos = cnt
+        
+            if (sys.argv[cnt+1]) != None :
+
+                fvalue  = sys.argv[cnt+1]
+                ftype   = "Processes"
+                valResult   = validateArguments(fvalue,ftype)
+                default = 1
+               
+            if (sys.argv[cnt+2]) != None:
+
+                fvalue  = sys.argv[cnt+2]
+                ftype   = "Requests"
+                valResult = validateArguments(fvalue,ftype)  
+                default = 2
+                                  
+            break     
+                
+    # Sets No of processes and requests to default values when both are not specified   
+    if (default == 0) :
+        processCnt = 5
+        requestCnt = 5
+        print( WARN +"WARN: No of Processes and Requests not specified. Set to the following default values: "+"\nNo of Process : "+(str(processCnt))+"\nNo of Requests : "+(str(requestCnt)) + EXIT)
+    
+    # Sets No of requests to default value when request count is not specified by the user    
+    elif (default == 1):
+        processCnt = int(sys.argv[pos+1])
+        requestCnt = processCnt
+        print( WARN +"WARN: No of Requests not specified. No of Requests is set to the following default value: "+"\nNo of Request : "+(str(requestCnt)) + EXIT)
+        
+    else :
+        processCnt = int(sys.argv[pos+1])
+        requestCnt = int(sys.argv[pos+2])
+        
+    
+    # Randomly shuffle requests to ProcessIds
+    processIds = []
+    for ptr in range(processCnt):
+        processIds.append(ptr)
+
+    processRequestCnt = dict.fromkeys(processIds,0)
+
+    random.shuffle(processIds)
+
+    processIdPtr = 0
+   
+    
+    # After 1 round of random allocation, it shuffles the processes and then again randomly distributes the requests repeats for each turn.
+    for i in range(requestCnt):
+        if (processIdPtr >= len(processIds)):
+            random.shuffle(processIds)
+            processIdPtr = 0 
+        
+        processRequestCnt[processIds[processIdPtr]] += 1
+        processIdPtr += 1
+
+    # Create procs
+    ps = list(createprocs(SKToken, processCnt))
+
+    print("\n\n"+INFO + "INFO:  Process-Request allocation details by random" +EXIT)
+    print("-------------------------------------------------------")
+    print("\n"+INFO +"No of Processes:    "+(str(processCnt))+EXIT)
+    print(""+INFO +"No of Requests:     "+(str(requestCnt))+EXIT+"\n")
+    print("-------------------------------------------------------")
+    print(INFO + "Process Id\t\t\tNoOfRequests" +EXIT)
+    print("-------------------------------------------------------")
+    for (cnt,p) in enumerate(ps):
+    
+        # The token is initially assigned to Process 1
+        if cnt==0:
+            initial_tokenvalue = True
+        else:
+            initial_tokenvalue = False
+            
+        # Sets up the processes
+        # Parameters - 
+        # process - current process, 
+        # torequestprocesses - list of processes to request for when token is not available, 
+        # alllistofprocess - the entire list of processes, 
+        # processrequestcnt - the no of requests the process can raise 
+        # initialtokenvalue - boolean value which indicates whether it is assigned the token initially
+        
+        setupprocs([p], [set(ps) - ({p}),ps,processRequestCnt[cnt],initial_tokenvalue])
+        
+        print(str(p)+"\t\t"+str(processRequestCnt[cnt]))
+        
+    print("-------------------------------------------------------\n")
+
+    print(INFO + "INFO: RUNNING SUZUKI-KASAMI's TOKEN-BASED ALGORITHM \n" +EXIT)
+    
+    # Starts the processes
+    startprocs(ps)
+    
+    for p in ps: p.join()
